@@ -69,7 +69,6 @@
       if ( ui.position ) {
         inputData[index]['positionLeft'] = ui.position.left / canvasWidth * 100;
         inputData[index]['positionTop'] = ui.position.top / canvasHeight * 100;
-
         inputData[index]['columnOffset'] = Math.round( ui.position.left / gridUnitSize );
       }
 
@@ -84,7 +83,7 @@
       $collageItems.resizable(resizableOptions)
                    .draggable(draggableOptions);
 
-      $collageItems.each(function() {
+      $collageItems.each(function(index) {
         var $item = $(this);
         var initialZIndex = $item.css('zIndex');
 
@@ -92,7 +91,19 @@
           $item.simulate('drag');
         }
 
+        // Set default values
+
+        inputData[index] = inputData[index] || {};
+
+        inputData[index]['columns'] = (typeof inputData[index]['columns'] !== 'undefined') ? inputData[index]['columns'] : 6;
+        inputData[index]['columnOffset'] = (typeof inputData[index]['columnOffset'] !== 'undefined') ? inputData[index]['columnOffset'] : Math.round( $item.position().left / gridUnitSize );
+        inputData[index]['zIndex'] = (typeof inputData[index]['zIndex'] !== 'undefined') ? inputData[index]['zIndex'] : $item.css('zIndex');
+        inputData[index]['positionLeft'] = (typeof inputData[index]['positionLeft'] !== 'undefined') ? inputData[index]['positionLeft'] : $item.position().left / canvasWidth * 100;
+        inputData[index]['positionTop'] = (typeof inputData[index]['positionTop'] !== 'undefined') ? inputData[index]['positionTop'] : $item.position().top / canvasHeight * 100;
+
         $item.css({ zIndex: initialZIndex });
+
+        $input.val( JSON.stringify( inputData ) );
       });
     }
 
