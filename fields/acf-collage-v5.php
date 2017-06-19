@@ -52,7 +52,7 @@ class acf_field_collage extends acf_field {
     */
 
     $this->defaults = array(
-      'font_size'  => 14,
+      'collage_data' => ''
     );
 
 
@@ -104,13 +104,13 @@ class acf_field_collage extends acf_field {
     *  Please note that you must also have a matching $defaults value for the field name (font_size)
     */
 
-    acf_render_field_setting( $field, array(
-      'label'      => __('Font Size','acf-collage'),
-      'instructions'  => __('Customise the input font size','acf-collage'),
-      'type'      => 'number',
-      'name'      => 'font_size',
-      'prepend'    => 'px',
-    ));
+    // acf_render_field_setting( $field, array(
+    //   'label'      => __('Font Size','acf-collage'),
+    //   'instructions'  => __('Customise the input font size','acf-collage'),
+    //   'type'      => 'number',
+    //   'name'      => 'font_size',
+    //   'prepend'    => 'px',
+    // ));
 
   }
 
@@ -146,6 +146,11 @@ class acf_field_collage extends acf_field {
     // global $post;
     $column_count = 12;
     $index = 0;
+    $collage_data = json_decode( $field['value'] );
+
+    echo '<pre>';
+      print_r( $collage_data );
+    echo '</pre>';
 
     echo '<div class="collage-item-canvas">';
       echo '<div class="collage-item-canvas__columns">';
@@ -159,9 +164,27 @@ class acf_field_collage extends acf_field {
         $index = -1;
         echo '<div class="collage-items">';
           while ( have_rows( 'collage_items' ) ): the_row(); $index++;
-            echo '<div class="collage-item">';
+            $data = $collage_data->$index;
+            $item_styles = array();
+            $data_attributes = array();
+
+            $columns = isset( $data->columns ) ? $data->columns : 12;
+            $positionTop = isset( $data->positionTop ) ? $data->positionTop : 0;
+            $positionLeft = isset( $data->positionLeft ) ? $data->positionLeft : 0;
+            $zIndex = isset( $data->zIndex ) ? $data->zIndex : 0;
+
+            array_push( $data_attributes, 'data-top="' . $positionTop . '"' );
+            array_push( $data_attributes, 'data-left="' . $positionLeft . '"' );
+
+            array_push( $item_styles, 'width:' . $columns / 12 * 100 . '%' );
+            // array_push( $item_styles, 'margin-top:' . $positionTop . '%' );
+            // array_push( $item_styles, 'margin-left:' . $positionLeft . '%' );
+            array_push( $item_styles, 'z-index:' . $zIndex );
+
+            echo '<div class="collage-item" style="' . join( $item_styles, '; ') . ';"' . join( $data_attributes, ' ') . '>';
               if ( get_row_layout() == 'image' ) {
-                echo '<img src="' . get_sub_field( 'image' )['url'] . '" style="max-width: 100%;">';
+                $image = get_sub_field( 'image' );
+                echo '<img width="' . $image['width'] . '" height="' . $image['height'] . '" src="' . $image['url'] . '">';
               } elseif ( get_row_layout() == 'video' ) {
                 the_sub_field( 'video' );
               }
@@ -169,16 +192,9 @@ class acf_field_collage extends acf_field {
           endwhile;
         echo '</div>';
       endif;
+      echo '<input type="hidden" name="' . esc_attr($field['name']) . '" value="' . esc_attr($field['value']) . '" />';
     echo '</div>';
 
-
-    /*
-    *  Create a simple text input using the 'font_size' setting.
-    */
-
-    ?>
-    <input type="text" name="<?php echo esc_attr($field['name']) ?>" value="<?php echo esc_attr($field['value']) ?>" style="font-size:<?php echo $field['font_size'] ?>px;" />
-    <?php
   }
 
 
@@ -206,6 +222,8 @@ class acf_field_collage extends acf_field {
 
 
     // register & include JS
+    wp_register_script( 'acf-input-collage_vendor-scripts', "{$url}assets/js/vendor.js", array('acf-input'), $version );
+    wp_enqueue_script('acf-input-collage_vendor-scripts');
     wp_register_script( 'acf-input-collage', "{$url}assets/js/input.js", array('acf-input'), $version );
     wp_enqueue_script('acf-input-collage');
 

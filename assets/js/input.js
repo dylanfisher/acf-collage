@@ -2,26 +2,154 @@
 
   function initialize_field( $el ) {
 
-    console.log($el);
+    console.log('$el', $el);
 
     var $field = $el;
     var $canvas = $field.find('.collage-item-canvas');
+
+    $canvas.addClass('collage-item-canvas--initialized');
+
     var $collageItems = $field.find('.collage-item');
-    var gridUnitSize = $canvas.width() / 12;
+    var $input = $canvas.find('input');
+    var inputData = $input.val();
 
-    // $(window).on('resize', function() {
-    //   gridUnitSize = $canvas.width() / 12;
-    // });
+    if ( isJsonString( inputData ) ) {
+      inputData = JSON.parse( inputData );
+    } else {
+      inputData = {};
+    }
 
-    $collageItems.resizable({
+    var gridUnitSize = getGridUnitSize();
+    var canvasWidth = getCanvasWidth();
+    var canvasHeight = getCanvasHeight();
+
+    console.log('gridUnitSize', gridUnitSize);
+
+    var resizableOptions = {
       grid: gridUnitSize,
-      containment: 'parent',
+      containment: $canvas,
       aspectRatio: true
-    }).draggable({
+    };
+
+    var draggableOptions = {
       grid: [ gridUnitSize, 10 ],
-      containment: 'parent',
-      zIndex: 100
+      containment: $canvas,
+      zIndex: 100,
+      stack: '.collage-item',
+      snap: '.collage-item-canvas__column',
+      snapMode: 'inner'
+    };
+
+    collageInit();
+
+    $(window).resize( $.debounce( 250, resizeEvents ) );
+
+    var windowWidth = $(window).width();
+
+    function resizeEvents() {
+      if ( $(window).width() == windowWidth ) return;
+      windowWidth = $(window).width();
+
+      gridUnitSize = getGridUnitSize();
+      canvasWidth = getCanvasWidth();
+      canvasHeight = getCanvasHeight();
+
+      // Destroy
+      $collageItems.resizable('destroy')
+                   .draggable('destroy');
+
+      collageInit();
+    }
+
+    $collageItems.on('resizestop dragstop', function(e, ui) {
+      var $item = $(ui.helper);
+      var index = $item.index();
+      // var canvasHeight = getRelativeCanvasHeight();
+
+      console.log('ui', ui);
+
+      inputData[index] = inputData[index] || {};
+
+      inputData[index]['zIndex'] = $item.css('zIndex');
+
+      if ( ui.size ) {
+        inputData[index]['columns'] = Math.floor( ui.size.width / gridUnitSize );
+      }
+
+      if ( ui.position ) {
+        inputData[index]['positionLeft'] = ui.position.left / canvasWidth * 100;
+        inputData[index]['positionTop'] = ui.position.top / canvasHeight * 100;
+      }
+
+      console.log('inputData', inputData);
+
+      $input.val( JSON.stringify( inputData ) );
     });
+
+    function collageInit() {
+      setInitialPosition();
+
+      $collageItems.resizable(resizableOptions)
+                   .draggable(draggableOptions);
+    }
+
+    function setInitialPosition() {
+      $collageItems.each(function() {
+        var $item = $(this);
+        var top = parseInt( $item.attr('data-top') );
+        var left = parseInt( $item.attr('data-left') );
+
+        if ( top ) {
+          console.log('canvasHeight / top', canvasHeight / top);
+          $item.css({ top: canvasWidth * ( top / 100 ) });
+        }
+
+        if ( left ) {
+          console.log('canvasWidth / left', canvasWidth / left);
+          $item.css({ left: canvasWidth * ( left / 100 ) });
+        }
+      });
+    }
+
+    // Helpers
+
+    function isJsonString(str) {
+      try {
+        JSON.parse(str);
+      } catch (e) {
+        return false;
+      }
+      return true;
+    }
+
+    function getRelativeCanvasHeight() {
+      var lowest = 0;
+      var $lowestElem;
+
+      $collageItems.each(function () {
+        var $this = $(this);
+        var offset = $this.position().top + $this.height();
+
+        if ( offset > lowest ) {
+          $lowestElem = this;
+          lowest = offset;
+        }
+      });
+
+      return lowest;
+    }
+
+    function getGridUnitSize() {
+      return Math.floor( $canvas.width() / 12 );
+    }
+
+    function getCanvasWidth() {
+      return $canvas.width();
+    }
+
+    function getCanvasHeight() {
+      return $canvas.height();
+    }
 
   }
 
