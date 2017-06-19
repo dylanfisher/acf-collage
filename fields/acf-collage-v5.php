@@ -148,10 +148,6 @@ class acf_field_collage extends acf_field {
     $index = 0;
     $collage_data = json_decode( $field['value'] );
 
-    echo '<pre>';
-      print_r( $collage_data );
-    echo '</pre>';
-
     echo '<div class="collage-item-canvas">';
       echo '<div class="collage-item-canvas__columns">';
         while ( $index <= $column_count - 1 ):
@@ -172,19 +168,31 @@ class acf_field_collage extends acf_field {
             $positionTop = isset( $data->positionTop ) ? $data->positionTop : 0;
             $positionLeft = isset( $data->positionLeft ) ? $data->positionLeft : 0;
             $zIndex = isset( $data->zIndex ) ? $data->zIndex : 0;
+            $columnWidth = $columns / 12 * 100;
+            $ratio = 16 / 9;
+
+            if ( get_row_layout() == 'image' ) {
+              $image = get_sub_field( 'image' );
+              $imageWidth = $image['width'];
+              $imageHeight = $image['height'];
+              $ratio = $imageWidth / $imageHeight;
+            } elseif ( get_row_layout() == 'video' ) {
+            }
+
+            $columnHeight = $columnWidth / $ratio;
+
 
             array_push( $data_attributes, 'data-top="' . $positionTop . '"' );
             array_push( $data_attributes, 'data-left="' . $positionLeft . '"' );
 
-            array_push( $item_styles, 'width:' . $columns / 12 * 100 . '%' );
-            // array_push( $item_styles, 'margin-top:' . $positionTop . '%' );
-            // array_push( $item_styles, 'margin-left:' . $positionLeft . '%' );
+            array_push( $item_styles, 'width:' . $columnWidth . '%' );
+            array_push( $item_styles, 'height:' . $columnHeight . '%' );
             array_push( $item_styles, 'z-index:' . $zIndex );
 
             echo '<div class="collage-item" style="' . join( $item_styles, '; ') . ';"' . join( $data_attributes, ' ') . '>';
               if ( get_row_layout() == 'image' ) {
                 $image = get_sub_field( 'image' );
-                echo '<img width="' . $image['width'] . '" height="' . $image['height'] . '" src="' . $image['url'] . '">';
+                echo '<div class="collage-item__image" style="background-image: url(\'' . $image['sizes']['large'] . '\');"></div>';
               } elseif ( get_row_layout() == 'video' ) {
                 the_sub_field( 'video' );
               }

@@ -2,8 +2,6 @@
 
   function initialize_field( $el ) {
 
-    console.log('$el', $el);
-
     var $field = $el;
     var $canvas = $field.find('.collage-item-canvas');
 
@@ -23,10 +21,8 @@
     var canvasWidth = getCanvasWidth();
     var canvasHeight = getCanvasHeight();
 
-    console.log('gridUnitSize', gridUnitSize);
-
     var resizableOptions = {
-      grid: gridUnitSize,
+      grid: [gridUnitSize, 1],
       containment: $canvas,
       aspectRatio: true
     };
@@ -54,7 +50,6 @@
       canvasWidth = getCanvasWidth();
       canvasHeight = getCanvasHeight();
 
-      // Destroy
       $collageItems.resizable('destroy')
                    .draggable('destroy');
 
@@ -64,24 +59,23 @@
     $collageItems.on('resizestop dragstop', function(e, ui) {
       var $item = $(ui.helper);
       var index = $item.index();
-      // var canvasHeight = getRelativeCanvasHeight();
-
-      console.log('ui', ui);
 
       inputData[index] = inputData[index] || {};
 
-      inputData[index]['zIndex'] = $item.css('zIndex');
-
       if ( ui.size ) {
-        inputData[index]['columns'] = Math.floor( ui.size.width / gridUnitSize );
+        inputData[index]['columns'] = Math.round( ui.size.width / gridUnitSize );
       }
 
       if ( ui.position ) {
         inputData[index]['positionLeft'] = ui.position.left / canvasWidth * 100;
         inputData[index]['positionTop'] = ui.position.top / canvasHeight * 100;
+
+        inputData[index]['columnOffset'] = Math.round( ui.position.left / gridUnitSize );
       }
 
-      console.log('inputData', inputData);
+      updateZIndexes();
+
+      console.log( inputData );
 
       $input.val( JSON.stringify( inputData ) );
     });
@@ -91,6 +85,15 @@
 
       $collageItems.resizable(resizableOptions)
                    .draggable(draggableOptions);
+
+      $collageItems.each(function() {
+        var $item = $(this);
+        var initialZIndex = $item.css('zIndex');
+
+        $item.simulate('drag');
+
+        $item.css({ zIndex: initialZIndex });
+      });
     }
 
     function setInitialPosition() {
@@ -100,14 +103,20 @@
         var left = parseInt( $item.attr('data-left') );
 
         if ( top ) {
-          console.log('canvasHeight / top', canvasHeight / top);
           $item.css({ top: canvasWidth * ( top / 100 ) });
         }
 
         if ( left ) {
-          console.log('canvasWidth / left', canvasWidth / left);
           $item.css({ left: canvasWidth * ( left / 100 ) });
         }
+      });
+    }
+
+    function updateZIndexes() {
+      $collageItems.each(function(index) {
+        var $item = $(this);
+
+        inputData[index]['zIndex'] = $item.css('zIndex');
       });
     }
 
