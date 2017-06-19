@@ -148,6 +148,10 @@ class acf_field_collage extends acf_field {
     $index = 0;
     $collage_data = json_decode( $field['value'] );
 
+    // echo '<pre>';
+    //   print_r( $collage_data );
+    // echo '</pre>';
+
     echo '<div class="collage-item-canvas">';
       echo '<div class="collage-item-canvas__columns">';
         while ( $index <= $column_count - 1 ):
@@ -158,17 +162,12 @@ class acf_field_collage extends acf_field {
 
       if ( have_rows( 'collage_items' ) ):
         $index = -1;
+        $collage_item_count = count( get_field( 'collage_items' ) );
+
         echo '<div class="collage-items">';
           while ( have_rows( 'collage_items' ) ): the_row(); $index++;
-            $data = $collage_data->$index;
             $item_styles = array();
             $data_attributes = array();
-
-            $columns = isset( $data->columns ) ? $data->columns : 12;
-            $positionTop = isset( $data->positionTop ) ? $data->positionTop : 0;
-            $positionLeft = isset( $data->positionLeft ) ? $data->positionLeft : 0;
-            $zIndex = isset( $data->zIndex ) ? $data->zIndex : 0;
-            $columnWidth = $columns / 12 * 100;
             $ratio = 16 / 9;
 
             if ( get_row_layout() == 'image' ) {
@@ -177,19 +176,41 @@ class acf_field_collage extends acf_field {
               $imageHeight = $image['height'];
               $ratio = $imageWidth / $imageHeight;
             } elseif ( get_row_layout() == 'video' ) {
+              // Nothing special
             }
 
+            if ( !is_null( $collage_data ) ):
+              $data = $collage_data->$index;
+
+              $columns = isset( $data->columns ) ? $data->columns : 6;
+              $positionTop = isset( $data->positionTop ) ? $data->positionTop : 0;
+              $positionLeft = isset( $data->positionLeft ) ? $data->positionLeft : 0;
+              $zIndex = isset( $data->zIndex ) ? $data->zIndex : 0;
+
+              array_push( $item_styles, 'z-index:' . $zIndex );
+
+            else:
+              $columns = 6;
+              $positionTop = 0;
+              $positionLeft = 0;
+
+              if ( $index > 0 ) {
+                $positionTop = $index / $collage_item_count * 100;
+                $positionLeft = $index / $collage_item_count * 100;
+              }
+
+              array_push( $data_attributes, 'data-first-initialization="true"' );
+            endif;
+
+            $columnWidth = $columns / 12 * 100;
             $columnHeight = $columnWidth / $ratio;
-
-            echo $columnHeight;
-
-            array_push( $data_attributes, 'data-top="' . $positionTop . '"' );
-            array_push( $data_attributes, 'data-left="' . $positionLeft . '"' );
 
             array_push( $item_styles, 'width:' . $columnWidth . '%' );
             array_push( $item_styles, 'height:' . 0 );
             array_push( $item_styles, 'padding-bottom:' . $columnHeight . '%' );
-            array_push( $item_styles, 'z-index:' . $zIndex );
+
+            array_push( $data_attributes, 'data-top="' . $positionTop . '"' );
+            array_push( $data_attributes, 'data-left="' . $positionLeft . '"' );
 
             echo '<div class="collage-item" style="' . join( $item_styles, '; ') . ';"' . join( $data_attributes, ' ') . '>';
               if ( get_row_layout() == 'image' ) {

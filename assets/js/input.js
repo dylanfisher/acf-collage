@@ -58,7 +58,7 @@
 
     $collageItems.on('resizestop dragstop', function(e, ui) {
       var $item = $(ui.helper);
-      var index = $item.index();
+      var index = $item.index('.collage-item');
 
       inputData[index] = inputData[index] || {};
 
@@ -75,8 +75,6 @@
 
       updateZIndexes();
 
-      console.log( inputData );
-
       $input.val( JSON.stringify( inputData ) );
     });
 
@@ -90,7 +88,9 @@
         var $item = $(this);
         var initialZIndex = $item.css('zIndex');
 
-        // $item.simulate('drag');
+        if ( $item.attr('data-first-initialization') == 'true' ) {
+          $item.simulate('drag');
+        }
 
         $item.css({ zIndex: initialZIndex });
       });
@@ -101,6 +101,7 @@
         var $item = $(this);
         var top = parseInt( $item.attr('data-top') );
         var left = parseInt( $item.attr('data-left') );
+        var height = $item.outerHeight();
 
         if ( !isNaN( top ) ) {
           $item.css({ top: canvasHeight * ( top / 100 ) });
@@ -109,6 +110,13 @@
         if ( !isNaN( left ) ) {
           $item.css({ left: canvasWidth * ( left / 100 ) });
         }
+
+        if ( !isNaN( height ) ) {
+          $item.css({
+            height: height,
+            paddingBottom: ''
+           });
+        }
       });
     }
 
@@ -116,7 +124,9 @@
       $collageItems.each(function(index) {
         var $item = $(this);
 
-        inputData[index]['zIndex'] = $item.css('zIndex');
+        inputData[index] = inputData[index] || {};
+
+        inputData[index]['zIndex'] = inputData[index]['zIndex'] || $item.css('zIndex') || 0;
       });
     }
 
