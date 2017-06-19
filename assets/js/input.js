@@ -90,7 +90,7 @@
         var $item = $(this);
         var initialZIndex = $item.css('zIndex');
 
-        $item.simulate('drag');
+        // $item.simulate('drag');
 
         $item.css({ zIndex: initialZIndex });
       });
@@ -102,11 +102,11 @@
         var top = parseInt( $item.attr('data-top') );
         var left = parseInt( $item.attr('data-left') );
 
-        if ( top ) {
-          $item.css({ top: canvasWidth * ( top / 100 ) });
+        if ( !isNaN( top ) ) {
+          $item.css({ top: canvasHeight * ( top / 100 ) });
         }
 
-        if ( left ) {
+        if ( !isNaN( left ) ) {
           $item.css({ left: canvasWidth * ( left / 100 ) });
         }
       });

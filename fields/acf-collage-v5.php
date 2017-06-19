@@ -181,12 +181,14 @@ class acf_field_collage extends acf_field {
 
             $columnHeight = $columnWidth / $ratio;
 
+            echo $columnHeight;
 
             array_push( $data_attributes, 'data-top="' . $positionTop . '"' );
             array_push( $data_attributes, 'data-left="' . $positionLeft . '"' );
 
             array_push( $item_styles, 'width:' . $columnWidth . '%' );
-            array_push( $item_styles, 'height:' . $columnHeight . '%' );
+            array_push( $item_styles, 'height:' . 0 );
+            array_push( $item_styles, 'padding-bottom:' . $columnHeight . '%' );
             array_push( $item_styles, 'z-index:' . $zIndex );
 
             echo '<div class="collage-item" style="' . join( $item_styles, '; ') . ';"' . join( $data_attributes, ' ') . '>';
