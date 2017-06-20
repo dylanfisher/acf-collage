@@ -192,7 +192,7 @@ class acf_field_collage extends acf_field {
 
             $row_layout = isset( $collage_item['acf_fc_layout'] ) ? $collage_item['acf_fc_layout'] : 'custom_row';
             $row_layout = trim( $row_layout );
-            if ( !empty( $row_layout ) ) {
+            if ( empty( $row_layout ) ) {
               $row_layout = 'custom_row';
             }
 
