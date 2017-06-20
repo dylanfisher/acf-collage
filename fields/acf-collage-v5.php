@@ -191,6 +191,7 @@ class acf_field_collage extends acf_field {
             $ratio = 16 / 9;
 
             $row_layout = isset( $collage_item['acf_fc_layout'] ) ? $collage_item['acf_fc_layout'] : 'custom_row';
+            var_dump($row_layout);
 
             if ( $row_layout == 'image' ) {
               $image = $collage_item['image'];
