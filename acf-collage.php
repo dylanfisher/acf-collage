@@ -37,7 +37,7 @@ class acf_plugin_collage {
 
 		// vars
 		$this->settings = array(
-			'version'	=> '1.0.0',
+			'version'	=> '1.1.0',
 			'url'		=> plugin_dir_url( __FILE__ ),
 			'path'		=> plugin_dir_path( __FILE__ )
 		);

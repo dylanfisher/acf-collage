@@ -162,21 +162,41 @@ class acf_field_collage extends acf_field {
 
       if ( have_rows( 'collage_items' ) ):
         $index = -1;
-        $collage_item_count = count( get_field( 'collage_items' ) );
+        $collage_items = get_field( 'collage_items' );
+
+        ob_start();
+?>
+          <div class="collage-description-area">
+            <?php the_title(); ?>
+            <br>
+            <?php if ( get_field( 'year' ) ): ?>
+              <?php the_field( 'year' ); ?>
+              <br><br>
+            <?php endif; ?>
+            <?php if ( get_field( 'one_sentence_description' ) ): ?>
+              <?php the_field( 'one_sentence_description' ); ?>
+              <br>
+            <?php endif; ?>
+          </div>
+<?php
+        $collage_description = ob_get_clean();
+
+        array_unshift( $collage_items, $collage_description );
+        $collage_item_count = count( $collage_items );
 
         echo '<div class="collage-items">';
-          while ( have_rows( 'collage_items' ) ): the_row(); $index++;
+          foreach ( $collage_items as $index => $collage_item ):
             $item_styles = array();
             $data_attributes = array();
             $ratio = 16 / 9;
 
-            if ( get_row_layout() == 'image' ) {
-              $image = get_sub_field( 'image' );
+            $row_layout = isset( $collage_item['acf_fc_layout'] ) ? $collage_item['acf_fc_layout'] : 'custom_row';
+
+            if ( $row_layout == 'image' ) {
+              $image = $collage_item['image'];
               $imageWidth = $image['width'];
               $imageHeight = $image['height'];
               $ratio = $imageWidth / $imageHeight;
-            } elseif ( get_row_layout() == 'video' ) {
-              // Nothing special
             }
 
             if ( !is_null( $collage_data ) ):
@@ -194,7 +214,7 @@ class acf_field_collage extends acf_field {
               $positionTop = 0;
               $positionLeft = 0;
 
-              if ( $index > 0 ) {
+              if ( $index > 1 ) {
                 $positionTop = $index / $collage_item_count * 100;
                 $positionLeft = $index / $collage_item_count * 100;
               }
@@ -212,15 +232,17 @@ class acf_field_collage extends acf_field {
             array_push( $data_attributes, 'data-top="' . $positionTop . '"' );
             array_push( $data_attributes, 'data-left="' . $positionLeft . '"' );
 
-            echo '<div class="collage-item" style="' . join( $item_styles, '; ') . ';"' . join( $data_attributes, ' ') . '>';
-              if ( get_row_layout() == 'image' ) {
-                $image = get_sub_field( 'image' );
+            echo '<div class="collage-item collage-item--layout-' . $row_layout . '" style="' . join( $item_styles, '; ') . ';"' . join( $data_attributes, ' ') . '>';
+              if ( $row_layout == 'image' ) {
+                $image = $collage_item['image'];
                 echo '<div class="collage-item__image" style="background-image: url(\'' . $image['sizes']['large'] . '\');"></div>';
-              } elseif ( get_row_layout() == 'video' ) {
-                the_sub_field( 'video' );
+              } elseif ( $row_layout == 'video' ) {
+                echo $collage_item['video'];
+              } elseif ( $row_layout == 'custom_row' ) {
+                echo $collage_description;
               }
             echo '</div>';
-          endwhile;
+          endforeach;
         echo '</div>';
       endif;
       echo '<input type="hidden" name="' . esc_attr($field['name']) . '" value="' . esc_attr($field['value']) . '" />';

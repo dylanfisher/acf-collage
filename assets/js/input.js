@@ -137,7 +137,7 @@
 
         inputData[index] = inputData[index] || {};
 
-        inputData[index]['zIndex'] = inputData[index]['zIndex'] || $item.css('zIndex') || 0;
+        inputData[index]['zIndex'] = $(this).css('zIndex') || 0;
       });
     }
 
