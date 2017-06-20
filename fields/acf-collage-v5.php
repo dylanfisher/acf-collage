@@ -195,6 +195,7 @@ class acf_field_collage extends acf_field {
             if ( !isset( $row_layout ) ) {
               $row_layout = 'custom_row';
             }
+            var_dump($row_layout);
 
             if ( $row_layout == 'image' ) {
               $image = $collage_item['image'];
