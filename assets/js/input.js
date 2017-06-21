@@ -39,6 +39,8 @@
       var largestZIndex = Math.max.apply( null, zIndexArray );
 
       $item.css({ zIndex: largestZIndex + 1 });
+
+      updateInputValue();
     });
 
     $(window).resize( $.debounce( 250, resizeEvents ) );
@@ -77,8 +79,6 @@
         inputData['items'][index]['columnOffset'] = Math.round( ui.position.left / gridUnitSize );
       }
 
-      updateZIndexes();
-
       updateInputValue();
     });
 
@@ -101,8 +101,7 @@
         var resizableOptions = {
           grid: [gridUnitSize, 1],
           containment: $canvas,
-          aspectRatio: true,
-          handles: 'all'
+          aspectRatio: true
         };
 
         var draggableOptions = {
@@ -174,18 +173,36 @@
     }
 
     function updateZIndexes() {
+      for ( var i = 0; i < $collageItems.length; i++ ) {
+        var $highestEl;
+        var maxz = -Infinity;
+
+        $collageItems.each(function() {
+          var z = parseInt( $(this).css('zIndex') );
+          if ( maxz < z ) {
+            $highestEl = $(this);
+            maxz = z;
+          }
+        });
+
+        $highestEl.css({ zIndex: -$collageItems.length + i });
+      }
+
       $collageItems.each(function(index) {
         var $item = $(this);
 
+        $item.css({ zIndex: Math.abs( $item.css('zIndex') ) });
+
         inputData['items'][index] = inputData['items'][index] || {};
 
-        inputData['items'][index]['zIndex'] = $(this).css('zIndex') || 0;
+        inputData['items'][index]['zIndex'] = $item.css('zIndex') || 0;
       });
     }
 
     function updateInputValue() {
-      console.log( 'inputData', inputData );
-      console.log( 'JSON.stringify( inputData )', JSON.stringify( inputData ) );
+      updateZIndexes();
+      // console.log( 'inputData', inputData );
+      // console.log( 'JSON.stringify( inputData )', JSON.stringify( inputData ) );
       $input.val( JSON.stringify( inputData ) );
     }
 
