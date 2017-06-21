@@ -23,23 +23,23 @@
     var canvasWidth = getCanvasWidth();
     var canvasHeight = getCanvasHeight();
 
-    var resizableOptions = {
-      grid: [gridUnitSize, 1],
-      containment: $canvas,
-      aspectRatio: true
-    };
-
-    var draggableOptions = {
-      grid: [ gridUnitSize, 10 ],
-      containment: $canvas,
-      zIndex: 100,
-      stack: '.collage-item',
-      snap: '.collage-item-canvas__column',
-      snapMode: 'inner'
-    };
-
     // Initialize
     collageInit();
+
+    $(document).on('click', '.collage-item', function() {
+      var $item = $(this);
+      var zIndex = parseInt( $item.css('zIndex') ) || 0;
+      var zIndexArray = [];
+
+      $collageItems.each(function() {
+        var thisZIndex = parseInt( $(this).css('zIndex') ) || 0;
+        zIndexArray.push( thisZIndex );
+      });
+
+      var largestZIndex = Math.max.apply( null, zIndexArray );
+
+      $item.css({ zIndex: largestZIndex + 1 });
+    });
 
     $(window).resize( $.debounce( 250, resizeEvents ) );
 
@@ -95,8 +95,33 @@
 
       setInitialPosition();
 
-      $collageItems.resizable(resizableOptions)
-                   .draggable(draggableOptions);
+      $collageItems.each(function() {
+        var $item = $(this);
+
+        var resizableOptions = {
+          grid: [gridUnitSize, 1],
+          containment: $canvas,
+          aspectRatio: true,
+          handles: 'all'
+        };
+
+        var draggableOptions = {
+          grid: [ gridUnitSize, 10 ],
+          containment: $canvas,
+          zIndex: 100,
+          stack: '.collage-item',
+          snap: '.collage-item-canvas__column',
+          snapMode: 'inner'
+        };
+
+        if ( $item.hasClass('collage-item--layout-custom_row') ) {
+          resizableOptions['handles'] = 'e, w';
+          resizableOptions['aspectRatio'] = false;
+        }
+
+        $item.resizable(resizableOptions)
+             .draggable(draggableOptions);
+      });
 
       $collageItems.each(function(index) {
         var $item = $(this);
