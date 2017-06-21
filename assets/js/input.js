@@ -17,6 +17,8 @@
       inputData = {};
     }
 
+    inputData['items'] = inputData['items'] || {};
+
     var gridUnitSize = getGridUnitSize();
     var canvasWidth = getCanvasWidth();
     var canvasHeight = getCanvasHeight();
@@ -36,6 +38,7 @@
       snapMode: 'inner'
     };
 
+    // Initialize
     collageInit();
 
     $(window).resize( $.debounce( 250, resizeEvents ) );
@@ -50,6 +53,8 @@
       canvasWidth = getCanvasWidth();
       canvasHeight = getCanvasHeight();
 
+      $canvas.resizable('destroy');
+
       $collageItems.resizable('destroy')
                    .draggable('destroy');
 
@@ -60,24 +65,34 @@
       var $item = $(ui.helper);
       var index = $item.index('.collage-item');
 
-      inputData[index] = inputData[index] || {};
+      inputData['items'][index] = inputData['items'][index] || {};
 
       if ( ui.size ) {
-        inputData[index]['columns'] = Math.round( ui.size.width / gridUnitSize );
+        inputData['items'][index]['columns'] = Math.round( ui.size.width / gridUnitSize );
       }
 
       if ( ui.position ) {
-        inputData[index]['positionLeft'] = ui.position.left / canvasWidth * 100;
-        inputData[index]['positionTop'] = ui.position.top / canvasHeight * 100;
-        inputData[index]['columnOffset'] = Math.round( ui.position.left / gridUnitSize );
+        inputData['items'][index]['positionLeft'] = ui.position.left / canvasWidth * 100;
+        inputData['items'][index]['positionTop'] = ui.position.top / canvasHeight * 100;
+        inputData['items'][index]['columnOffset'] = Math.round( ui.position.left / gridUnitSize );
       }
 
       updateZIndexes();
 
-      $input.val( JSON.stringify( inputData ) );
+      updateInputValue();
     });
 
     function collageInit() {
+      // Make the entire canvas resizable
+      $canvas.resizable({
+        minHeight: ( $(window).width() * 0.6 ),
+        handles: 's',
+        stop: function() {
+          inputData['canvasHeightRatio'] = $canvas.height() / $(window).width() * 100;
+          updateInputValue();
+        }
+      });
+
       setInitialPosition();
 
       $collageItems.resizable(resizableOptions)
@@ -87,23 +102,25 @@
         var $item = $(this);
         var initialZIndex = $item.css('zIndex');
 
-        if ( $item.attr('data-first-initialization') == 'true' ) {
-          $item.simulate('drag');
-        }
+        // if ( $item.attr('data-first-initialization') == 'true' ) {
+        //   $item.simulate('drag');
+        // }
+
+        $item.simulate('drag');
 
         // Set default values
 
-        inputData[index] = inputData[index] || {};
+        inputData['items'][index] = inputData['items'][index] || {};
 
-        inputData[index]['columns'] = (typeof inputData[index]['columns'] !== 'undefined') ? inputData[index]['columns'] : 6;
-        inputData[index]['columnOffset'] = (typeof inputData[index]['columnOffset'] !== 'undefined') ? inputData[index]['columnOffset'] : Math.round( $item.position().left / gridUnitSize );
-        inputData[index]['zIndex'] = (typeof inputData[index]['zIndex'] !== 'undefined') ? inputData[index]['zIndex'] : $item.css('zIndex');
-        inputData[index]['positionLeft'] = (typeof inputData[index]['positionLeft'] !== 'undefined') ? inputData[index]['positionLeft'] : $item.position().left / canvasWidth * 100;
-        inputData[index]['positionTop'] = (typeof inputData[index]['positionTop'] !== 'undefined') ? inputData[index]['positionTop'] : $item.position().top / canvasHeight * 100;
+        inputData['items'][index]['columns'] = (typeof inputData['items'][index]['columns'] !== 'undefined') ? inputData['items'][index]['columns'] : 6;
+        inputData['items'][index]['columnOffset'] = (typeof inputData['items'][index]['columnOffset'] !== 'undefined') ? inputData['items'][index]['columnOffset'] : Math.round( $item.position().left / gridUnitSize );
+        inputData['items'][index]['zIndex'] = (typeof inputData['items'][index]['zIndex'] !== 'undefined') ? inputData['items'][index]['zIndex'] : $item.css('zIndex');
+        inputData['items'][index]['positionLeft'] = (typeof inputData['items'][index]['positionLeft'] !== 'undefined') ? inputData['items'][index]['positionLeft'] : $item.position().left / canvasWidth * 100;
+        inputData['items'][index]['positionTop'] = (typeof inputData['items'][index]['positionTop'] !== 'undefined') ? inputData['items'][index]['positionTop'] : $item.position().top / canvasHeight * 100;
 
         $item.css({ zIndex: initialZIndex });
 
-        $input.val( JSON.stringify( inputData ) );
+        updateInputValue();
       });
     }
 
@@ -135,10 +152,16 @@
       $collageItems.each(function(index) {
         var $item = $(this);
 
-        inputData[index] = inputData[index] || {};
+        inputData['items'][index] = inputData['items'][index] || {};
 
-        inputData[index]['zIndex'] = $(this).css('zIndex') || 0;
+        inputData['items'][index]['zIndex'] = $(this).css('zIndex') || 0;
       });
+    }
+
+    function updateInputValue() {
+      console.log( 'inputData', inputData );
+      console.log( 'JSON.stringify( inputData )', JSON.stringify( inputData ) );
+      $input.val( JSON.stringify( inputData ) );
     }
 
     // Helpers

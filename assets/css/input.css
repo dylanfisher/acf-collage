@@ -12,7 +12,6 @@
 
 .collage-item-canvas__column {
   position: absolute;
-  /*width: 6.866%;*/
   width: 8.3333%;
   height: 100%;
   background-color: rgb(173, 247, 255);
@@ -35,8 +34,8 @@
 
 .collage-item {
   background: rgb(119, 119, 119);
-  padding: 5px;
-  margin-bottom: 10px;
+  /*padding: 5px;*/
+  /*margin-bottom: 10px;*/
   overflow: hidden;
   position: absolute;
   z-index: 1;

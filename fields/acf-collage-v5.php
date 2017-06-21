@@ -146,13 +146,14 @@ class acf_field_collage extends acf_field {
     // global $post;
     $column_count = 12;
     $index = 0;
-    $collage_data = json_decode( $field['value'] );
+    $collage_data = json_decode( $field['value'], true );
+    $collage_height = isset( $collage_data['canvasHeightRatio'] ) ? $collage_data['canvasHeightRatio'] : 60;
 
-    // echo '<pre>';
-    //   print_r( $collage_data );
-    // echo '</pre>';
+    echo '<pre>';
+      print_r( $collage_data );
+    echo '</pre>';
 
-    echo '<div class="collage-item-canvas">';
+    echo '<div class="collage-item-canvas" style="height:' . $collage_height . 'vw;">';
       echo '<div class="collage-item-canvas__columns">';
         while ( $index <= $column_count - 1 ):
           echo '<div class="collage-item-canvas__column collage-item-canvas__column-' . $index . '"></div>';
@@ -203,13 +204,13 @@ class acf_field_collage extends acf_field {
               $ratio = $imageWidth / $imageHeight;
             }
 
-            if ( !is_null( $collage_data ) ):
-              $data = $collage_data->$index;
+            if ( !is_null( $collage_data ) && !is_null( $collage_data['items'] ) ):
+              $data = $collage_data['items'][$index];
 
-              $columns = isset( $data->columns ) ? $data->columns : 6;
-              $positionTop = isset( $data->positionTop ) ? $data->positionTop : 0;
-              $positionLeft = isset( $data->positionLeft ) ? $data->positionLeft : 0;
-              $zIndex = isset( $data->zIndex ) ? $data->zIndex : 0;
+              $columns = isset( $data['columns'] ) ? $data['columns'] : 6;
+              $positionTop = isset( $data['positionTop'] ) ? $data['positionTop'] : 0;
+              $positionLeft = isset( $data['positionLeft'] ) ? $data['positionLeft'] : 0;
+              $zIndex = isset( $data['zIndex'] ) ? $data['zIndex'] : 0;
 
               array_push( $item_styles, 'z-index:' . $zIndex );
 
