@@ -149,9 +149,9 @@ class acf_field_collage extends acf_field {
     $collage_data = json_decode( $field['value'], true );
     $collage_height = isset( $collage_data['canvasHeightRatio'] ) ? $collage_data['canvasHeightRatio'] : 60;
 
-    echo '<pre>';
-      print_r( $collage_data );
-    echo '</pre>';
+    // echo '<pre>';
+    //   print_r( $collage_data );
+    // echo '</pre>';
 
     echo '<div class="collage-item-canvas" style="height:' . $collage_height . 'vw;">';
       echo '<div class="collage-item-canvas__columns">';
