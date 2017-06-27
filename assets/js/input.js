@@ -49,6 +49,7 @@
 
     function resizeEvents() {
       if ( $(window).width() == windowWidth ) return;
+
       windowWidth = $(window).width();
 
       gridUnitSize = getGridUnitSize();
@@ -59,6 +60,8 @@
 
       $collageItems.resizable('destroy')
                    .draggable('destroy');
+
+      updateRelativePositions();
 
       collageInit();
     }
@@ -74,26 +77,39 @@
       }
 
       if ( ui.position ) {
-        inputData['items'][index]['positionLeft'] = ui.position.left / canvasWidth * 100;
-        inputData['items'][index]['positionTop'] = ui.position.top / canvasHeight * 100;
+        inputData['items'][index]['positionLeft'] = ui.position.left / getCanvasWidth() * 100;
+        inputData['items'][index]['positionTop'] = ui.position.top / getCanvasHeight() * 100;
         inputData['items'][index]['columnOffset'] = Math.round( ui.position.left / gridUnitSize );
+        // console.log("inputData['items'][index]['positionTop']", ui.position.top / getCanvasHeight() * 100);
       }
 
       updateInputValue();
     });
 
     function collageInit() {
+      var initialCanvasHeight = getCanvasWidth() * ( parseInt( $canvas.attr('data-initial-collage-height') ) / 100 );
+      // console.log('initialCanvasHeight', initialCanvasHeight);
+
+      $canvas.css({ height: initialCanvasHeight });
+
       // Make the entire canvas resizable
       $canvas.resizable({
         minHeight: ( $(window).width() * 0.6 ),
         handles: 's',
         stop: function() {
-          inputData['canvasHeightRatio'] = $canvas.height() / $(window).width() * 100;
+          // inputData['canvasHeightRatio'] = $canvas.height() / $(window).width() * 100;
+          inputData['canvasHeightRatio'] = getCanvasHeight() / getCanvasWidth() * 100;
+          // console.log("inputData['canvasHeightRatio']", inputData['canvasHeightRatio']);
+          // inputData['canvasHeightRatio'] = getCanvasWidth() / getCanvasHeight() * 100;
+          updateAbsolutePositions();
           updateInputValue();
+        },
+        start: function() {
+          updateRelativePositions();
         }
       });
 
-      setInitialPosition();
+      updateAbsolutePositions(true);
 
       $collageItems.each(function() {
         var $item = $(this);
@@ -126,11 +142,11 @@
         var $item = $(this);
         var initialZIndex = $item.css('zIndex');
 
-        // if ( $item.attr('data-first-initialization') == 'true' ) {
-        //   $item.simulate('drag');
-        // }
+        if ( $item.attr('data-first-initialization') == 'true' ) {
+          $item.simulate('drag');
+        }
 
-        $item.simulate('drag');
+        // $item.simulate('drag');
 
         // Set default values
 
@@ -139,8 +155,8 @@
         inputData['items'][index]['columns'] = (typeof inputData['items'][index]['columns'] !== 'undefined') ? inputData['items'][index]['columns'] : 6;
         inputData['items'][index]['columnOffset'] = (typeof inputData['items'][index]['columnOffset'] !== 'undefined') ? inputData['items'][index]['columnOffset'] : Math.round( $item.position().left / gridUnitSize );
         inputData['items'][index]['zIndex'] = (typeof inputData['items'][index]['zIndex'] !== 'undefined') ? inputData['items'][index]['zIndex'] : $item.css('zIndex');
-        inputData['items'][index]['positionLeft'] = (typeof inputData['items'][index]['positionLeft'] !== 'undefined') ? inputData['items'][index]['positionLeft'] : $item.position().left / canvasWidth * 100;
-        inputData['items'][index]['positionTop'] = (typeof inputData['items'][index]['positionTop'] !== 'undefined') ? inputData['items'][index]['positionTop'] : $item.position().top / canvasHeight * 100;
+        inputData['items'][index]['positionLeft'] = (typeof inputData['items'][index]['positionLeft'] !== 'undefined') ? inputData['items'][index]['positionLeft'] : $item.position().left / getCanvasWidth() * 100;
+        inputData['items'][index]['positionTop'] = (typeof inputData['items'][index]['positionTop'] !== 'undefined') ? inputData['items'][index]['positionTop'] : $item.position().top / getCanvasHeight() * 100;
 
         $item.css({ zIndex: initialZIndex });
 
@@ -148,19 +164,26 @@
       });
     }
 
-    function setInitialPosition() {
+    function updateAbsolutePositions(firstInit) {
       $collageItems.each(function() {
         var $item = $(this);
-        var top = parseInt( $item.attr('data-top') );
-        var left = parseInt( $item.attr('data-left') );
+        var top;
+        var left;
+        if ( firstInit ) {
+          top = getCanvasHeight() * ( parseInt( $item.attr('data-top') ) / 100 );
+          left = getCanvasWidth() * ( parseInt( $item.attr('data-left') ) / 100 );
+        } else {
+          top = parseInt( $item.css('top') );
+          left = parseInt( $item.css('left') );
+        }
         var height = $item.outerHeight();
 
         if ( !isNaN( top ) ) {
-          $item.css({ top: canvasHeight * ( top / 100 ) });
+          $item.css({ top: top });
         }
 
         if ( !isNaN( left ) ) {
-          $item.css({ left: canvasWidth * ( left / 100 ) });
+          $item.css({ left: left });
         }
 
         if ( !isNaN( height ) ) {
@@ -169,6 +192,25 @@
             paddingBottom: ''
            });
         }
+      });
+    }
+
+    function updateRelativePositions() {
+      $collageItems.each(function() {
+        var $item = $(this);
+        var top = parseInt( $item.css('top') ) / getCanvasHeight() * 100 + '%';
+        var left = parseInt( $item.css('left') ) / getCanvasWidth() * 100 + '%';
+        var originalWidthPercentage = parseInt( $item.attr('data-initial-width') );
+        var originalHeightPercentage = parseInt( $item.attr('data-initial-height') );
+        var heightRatio = originalWidthPercentage / originalHeightPercentage;
+        var width = $item.width();
+        var height = width / heightRatio;
+
+        $item.css({
+          top: top,
+          left: left,
+          height: height
+        });
       });
     }
 
@@ -235,7 +277,7 @@
     }
 
     function getGridUnitSize() {
-      return Math.floor( $canvas.width() / 12 );
+      return Math.floor( getCanvasWidth() / 12 );
     }
 
     function getCanvasWidth() {

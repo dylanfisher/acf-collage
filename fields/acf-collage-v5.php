@@ -153,7 +153,7 @@ class acf_field_collage extends acf_field {
     //   print_r( $collage_data );
     // echo '</pre>';
 
-    echo '<div class="collage-item-canvas" style="height:' . $collage_height . 'vw;">';
+    echo '<div class="collage-item-canvas" style="height:' . $collage_height . 'vw;" data-initial-collage-height="' . $collage_height . '">';
       echo '<div class="collage-item-canvas__columns">';
         while ( $index <= $column_count - 1 ):
           echo '<div class="collage-item-canvas__column collage-item-canvas__column-' . $index . '"></div>';
@@ -234,6 +234,8 @@ class acf_field_collage extends acf_field {
             array_push( $item_styles, 'height:' . 0 );
             array_push( $item_styles, 'padding-bottom:' . $columnHeight . '%' );
 
+            array_push( $data_attributes, 'data-initial-width="' . $columnWidth . '"' );
+            array_push( $data_attributes, 'data-initial-height="' . $columnHeight . '"' );
             array_push( $data_attributes, 'data-top="' . $positionTop . '"' );
             array_push( $data_attributes, 'data-left="' . $positionLeft . '"' );
 
@@ -276,7 +278,8 @@ class acf_field_collage extends acf_field {
 
     // vars
     $url = $this->settings['url'];
-    $version = $this->settings['version'];
+    // $version = $this->settings['version'];
+    $version = '1.1.0';
 
 
     // register & include JS
