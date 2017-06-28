@@ -103,19 +103,31 @@
           inputData['canvasHeightRatio'] = getCanvasHeight() / getCanvasWidth() * 100;
           // console.log("inputData['canvasHeightRatio']", inputData['canvasHeightRatio']);
           // inputData['canvasHeightRatio'] = getCanvasWidth() / getCanvasHeight() * 100;
+          // updateRelativePositions();
           updateAbsolutePositions();
+
+          $collageItems.each(function(index) {
+            var $item = $(this);
+
+            inputData['items'][index] = inputData['items'][index] || {};
+            inputData['items'][index]['positionLeft'] = $item.position().left / getCanvasWidth() * 100;
+            inputData['items'][index]['positionTop'] = $item.position().top / getCanvasHeight() * 100;
+
+            // console.log('$item.position()', $item.position());
+          });
+
           updateInputValue();
         },
         start: function() {
-          updateRelativePositions();
+          // updateRelativePositions();
         }
       });
 
       updateAbsolutePositions(true);
 
-      $canvas.find('.collage-description-area').css({
-        fontSize: getCanvasHeight() / getCanvasWidth() + 'vw'
-      });
+      // $canvas.find('.collage-description-area').css({
+      //   fontSize: getCanvasHeight() / getCanvasWidth() + 'vw'
+      // });
 
       $collageItems.each(function() {
         var $item = $(this);

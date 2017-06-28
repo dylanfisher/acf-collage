@@ -82,6 +82,7 @@
 
 .collage-description-area,
 .collage-description-area * {
+  font-size: 1.3vw !important;
   /*font-size: 1.9vw !important;*/
   /*font-size: 27px !important;*/
   line-height: 1.4 !important;
