@@ -279,7 +279,7 @@ class acf_field_collage extends acf_field {
     // vars
     $url = $this->settings['url'];
     // $version = $this->settings['version'];
-    $version = '1.1.0';
+    $version = '1.2.0';
 
 
     // register & include JS

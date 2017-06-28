@@ -90,7 +90,9 @@
       var initialCanvasHeight = getCanvasWidth() * ( parseInt( $canvas.attr('data-initial-collage-height') ) / 100 );
       // console.log('initialCanvasHeight', initialCanvasHeight);
 
-      $canvas.css({ height: initialCanvasHeight });
+      $canvas.css({
+        height: initialCanvasHeight
+      });
 
       // Make the entire canvas resizable
       $canvas.resizable({
@@ -110,6 +112,10 @@
       });
 
       updateAbsolutePositions(true);
+
+      $canvas.find('.collage-description-area').css({
+        fontSize: getCanvasHeight() / getCanvasWidth() + 'vw'
+      });
 
       $collageItems.each(function() {
         var $item = $(this);
