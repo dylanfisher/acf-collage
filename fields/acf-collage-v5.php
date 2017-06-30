@@ -230,6 +230,17 @@ class acf_field_collage extends acf_field {
             $columnWidth = $columns / 12 * 100;
             $columnHeight = $columnWidth / $ratio;
 
+            if ( $row_layout == 'video' ):
+              $video_aspect_ratio_width = isset( $collage_item['aspect_ratio_width'] ) ? $collage_item['aspect_ratio_width'] : 16;
+              $video_aspect_ratio_height = isset( $collage_item['aspect_ratio_height'] ) ? $collage_item['aspect_ratio_height'] : 9;
+
+              $video_ratio = $video_aspect_ratio_height / $video_aspect_ratio_width;
+
+              if ( $video_aspect_ratio_width && $video_aspect_ratio_height ):
+                $columnHeight = $columnWidth * $video_ratio;
+              endif;
+            endif;
+
             array_push( $item_styles, 'width:' . $columnWidth . '%' );
             array_push( $item_styles, 'height:' . 0 );
             array_push( $item_styles, 'padding-bottom:' . $columnHeight . '%' );
@@ -279,7 +290,7 @@ class acf_field_collage extends acf_field {
     // vars
     $url = $this->settings['url'];
     // $version = $this->settings['version'];
-    $version = '1.2.0';
+    $version = '1.3.0';
 
 
     // register & include JS
